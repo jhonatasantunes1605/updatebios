@@ -6,35 +6,33 @@
 <title>Verificador de Mudanças</title>
 <script>
 function verificarMudancas() {
-    // URL do proxy PHP que você configurou no seu servidor
-    var proxyUrl = 'proxy.php?url=' + encodeURIComponent(document.getElementById('urlInput').value.trim());
+    // Obtém a URL da entrada do usuário
+    var url = document.getElementById('urlInput').value.trim();
 
-    // Realiza uma solicitação HTTP GET para obter o conteúdo da página via proxy
-    var request = new XMLHttpRequest();
-    request.open('GET', proxyUrl, true);
+    if (!url) {
+        alert('Por favor, insira a URL da página a ser monitorada.');
+        return;
+    }
 
-    request.onload = function() {
-        if (request.status >= 200 && request.status < 400) {
-            // Sucesso ao obter o conteúdo da página
-            var novoConteudo = request.responseText;
+    // Realiza uma solicitação HTTP GET para obter o conteúdo da página
+    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    .then(response => response.json())
+    .then(data => {
+        var novoConteudo = data.contents;
+
+        // Verifica se houve uma mudança no conteúdo
+        if (novoConteudo !== conteudoAnterior) {
+            // Notifica o usuário sobre a mudança
+            alert('Nova versão de BIOS disponível!');
             
-            // Verifica se houve uma mudança no conteúdo
-            if (novoConteudo !== conteudoAnterior) {
-                // Notifica o usuário sobre a mudança
-                alert('Nova versão de BIOS disponível!');
-                
-                // Atualiza o conteúdo anterior com o novo conteúdo
-                conteudoAnterior = novoConteudo;
-            }
+            // Atualiza o conteúdo anterior com o novo conteúdo
+            conteudoAnterior = novoConteudo;
         }
-    };
-
-    request.onerror = function() {
+    })
+    .catch(error => {
         // Trata erros de solicitação
-        console.error('Erro ao tentar acessar a página.');
-    };
-
-    request.send();
+        console.error('Erro ao tentar acessar a página: ' + error);
+    });
 }
 
 // Define o intervalo para verificar as mudanças (em milissegundos)
