@@ -3,43 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscar Palavra-Chave em Site</title>
+<title>Verificador de Mudanças</title>
+<script>
+function verificarMudancas() {
+    // URL do proxy PHP que você configurou no seu servidor
+    var proxyUrl = 'proxy.php?url=' + encodeURIComponent(document.getElementById('urlInput').value.trim());
+
+    // Realiza uma solicitação HTTP GET para obter o conteúdo da página via proxy
+    var request = new XMLHttpRequest();
+    request.open('GET', proxyUrl, true);
+
+    request.onload = function() {
+        if (request.status >= 200 && request.status < 400) {
+            // Sucesso ao obter o conteúdo da página
+            var novoConteudo = request.responseText;
+            
+            // Verifica se houve uma mudança no conteúdo
+            if (novoConteudo !== conteudoAnterior) {
+                // Notifica o usuário sobre a mudança
+                alert('Nova versão de BIOS disponível!');
+                
+                // Atualiza o conteúdo anterior com o novo conteúdo
+                conteudoAnterior = novoConteudo;
+            }
+        }
+    };
+
+    request.onerror = function() {
+        // Trata erros de solicitação
+        console.error('Erro ao tentar acessar a página.');
+    };
+
+    request.send();
+}
+
+// Define o intervalo para verificar as mudanças (em milissegundos)
+var intervalo = 60000; // 1 minuto
+
+// Inicializa o conteúdo anterior como vazio
+var conteudoAnterior = '';
+
+// Inicia o processo de verificação de mudanças em intervalos regulares
+setInterval(verificarMudancas, intervalo);
+</script>
 </head>
 <body>
-    <h1>Buscar Palavra-Chave em Site</h1>
-    <form id="searchForm">
-        <label for="urlInput">URL do Site:</label><br>
-        <input type="text" id="urlInput" name="urlInput" required><br>
-        <label for="keywordInput">Palavra-Chave:</label><br>
-        <input type="text" id="keywordInput" name="keywordInput" required><br><br>
-        <button type="submit">Buscar</button>
-    </form>
-
-    <div id="result"></div>
-
-    <script>
-        document.getElementById("searchForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            var url = document.getElementById("urlInput").value;
-            var keyword = document.getElementById("keywordInput").value;
-
-            fetch('proxy.php?url=' + encodeURIComponent(url))
-            .then(response => response.text())
-            .then(html => {
-                var parser = new DOMParser();
-                var doc = parser.parseFromString(html, "text/html");
-                var bodyText = doc.body.innerText;
-                
-                if (bodyText.includes(keyword)) {
-                    document.getElementById("result").innerHTML = "A palavra-chave foi encontrada no site.";
-                } else {
-                    document.getElementById("result").innerHTML = "A palavra-chave não foi encontrada no site.";
-                }
-            })
-            .catch(error => {
-                document.getElementById("result").innerHTML = "Erro ao buscar o site: " + error;
-            });
-        });
-    </script>
+<label for="urlInput">URL da Página:</label>
+<input type="text" id="urlInput">
+<button onclick="verificarMudancas()">Verificar Mudanças</button>
 </body>
 </html>
