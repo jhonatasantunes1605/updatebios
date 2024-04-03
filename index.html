@@ -1,53 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verificador de Mudanças</title>
-<script>
-function verificarMudancas() {
-    // Obtém a URL da entrada do usuário
-    var url = document.getElementById('urlInput').value.trim();
-
-    if (!url) {
-        alert('Por favor, insira a URL da página a ser monitorada.');
-        return;
-    }
-
-    // Realiza uma solicitação HTTP GET para obter o conteúdo da página
-    fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
-    .then(response => response.json())
-    .then(data => {
-        var novoConteudo = data.contents;
-
-        // Verifica se houve uma mudança no conteúdo
-        if (novoConteudo !== conteudoAnterior) {
-            // Notifica o usuário sobre a mudança
-            alert('Nova versão de BIOS disponível!');
-            
-            // Atualiza o conteúdo anterior com o novo conteúdo
-            conteudoAnterior = novoConteudo;
-        }
-    })
-    .catch(error => {
-        // Trata erros de solicitação
-        console.error('Erro ao tentar acessar a página: ' + error);
-    });
-}
-
-// Define o intervalo para verificar as mudanças (em milissegundos)
-var intervalo = 60000; // 1 minuto
-
-// Inicializa o conteúdo anterior como vazio
-var conteudoAnterior = '';
-
-// Inicia o processo de verificação de mudanças em intervalos regulares
-setInterval(verificarMudancas, intervalo);
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Monitor</title>
 </head>
 <body>
-<label for="urlInput">URL da Página:</label>
-<input type="text" id="urlInput">
-<button onclick="verificarMudancas()">Verificar Mudanças</button>
+    <h1>Web Monitor</h1>
+    <input type="text" id="urlInput" placeholder="Insira a URL">
+    <button onclick="monitorPage()">Iniciar Monitoramento</button>
+    <div id="content"></div>
+
+    <script>
+        function monitorPage() {
+            // Obtém a URL inserida pelo usuário
+            var url = document.getElementById('urlInput').value;
+
+            // Verifica se a URL está vazia
+            if (url.trim() === '') {
+                alert('Por favor, insira uma URL válida.');
+                return;
+            }
+
+            // Carrega o conteúdo da página
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Exibe o conteúdo da página
+                    document.getElementById('content').innerHTML = data;
+
+                    // Aqui você pode comparar o conteúdo atual com o anterior
+                    // e notificar o usuário sobre quaisquer alterações
+                })
+                .catch(error => console.error('Erro:', error));
+        }
+    </script>
 </body>
 </html>
